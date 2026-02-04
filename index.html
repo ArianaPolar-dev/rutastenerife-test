@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="es" style="background-color: #8c8c8c">
+<head>
+<meta name="robots" content="noindex,nofollow">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="author" content="casa">
+<title>Costa Adeje</title>
+
+<!-- DearFlip CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dearflip@latest/css/dearflip.min.css">
+
+<style type="text/css">
+body { 
+    background-color: #fff; 
+    margin-top: 2%; 
+    margin-left: 4%; 
+    margin-right: 4%; 
+    margin-bottom: 2%; 
+    padding: 4%; 
+    border-width: 1px; 
+    border-color: black; 
+    border-style: solid; 
+}
+
+p { 
+    color: #E36C0A; 
+    font-family: sans-serif; 
+    font-weight: bold; 
+    font-size: 48pt; 
+    text-align: center; 
+}
+
+img { 
+    display: block; 
+    margin: 0 auto; 
+    max-width: 100%; 
+    height: auto; 
+}
+
+.topnav { 
+    background-color: #4CAF50; 
+    overflow: hidden; 
+}
+
+.topnav a { 
+    float: left; 
+    display: block; 
+    color: #f2f2f2; 
+    text-align: center; 
+    padding: 18px 20px; 
+    text-decoration: none; 
+    font-size: 21px; 
+}
+
+.topnav a:hover { 
+    background-color: #ddd; 
+    color: black; 
+}
+
+.topnav a.active { 
+    background-color: #04AA6D; 
+    color: white; 
+}
+
+/* Estilos para los flipbooks */
+.flipbooks-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-top: 40px;
+    margin-bottom: 40px;
+}
+
+.flipbook-box {
+    border: 3px solid #E36C0A;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+}
+
+.flipbook-title {
+    color: #E36C0A;
+    font-family: sans-serif;
+    font-weight: bold;
+    font-size: 28pt;
+    text-align: center;
+    margin-bottom: 20px;
+    margin-top: 0;
+}
+
+._df_book {
+    height: 600px;
+    width: 100%;
+    margin: 20px 0;
+}
+
+.download-btn {
+    display: block;
+    background-color: #4CAF50;
+    color: white;
+    text-align: center;
+    padding: 15px 20px;
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 5px;
+    margin-top: 20px;
+}
+
+.download-btn:hover {
+    background-color: #04AA6D;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .flipbooks-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .flipbook-title {
+        font-size: 24pt;
+    }
+    
+    ._df_book {
+        height: 500px;
+    }
+}
+</style>
+</head>
+<body>
+
+<!-- Menú superior original -->
+<div class="topnav" id="myTopnav">
+    <a href="index.html" class="active">Inicio</a>
+    <a href="index.html">Anterior</a>
+    <a href="rutas1.html">Siguiente</a>
+</div>
+
+<br>
+
+<!-- Imagen y título original -->
+<p>
+    <span><img width="816" height="304" src="img/Image_001-0.jpg"></span>
+    COSTA ADEJE<br>TENERIFE
+</p>
+
+<!-- Container de los dos flipbooks -->
+<div class="flipbooks-container">
+    
+    <!-- Recuadro 1: PDF en Español -->
+    <div class="flipbook-box">
+        <h2 class="flipbook-title">📖 Rutas en Español</h2>
+        <div class="_df_book" source="ruta-espanol.pdf" height="600"></div>
+        <a href="ruta-espanol.pdf" download class="download-btn">⬇ Descargar PDF en Español</a>
+    </div>
+    
+    <!-- Recuadro 2: PDF en Inglés -->
+    <div class="flipbook-box">
+        <h2 class="flipbook-title">📖 Routes in English</h2>
+        <div class="_df_book" source="ruta-ingles.pdf" height="600"></div>
+        <a href="ruta-ingles.pdf" download class="download-btn">⬇ Download PDF in English</a>
+    </div>
+    
+</div>
+
+<!-- DearFlip JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/dearflip@latest/js/dearflip.min.js"></script>
+
+</body>
+</html>
