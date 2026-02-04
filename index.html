@@ -79,21 +79,6 @@ body {
     position: relative;
 }
 
-/* Número del recuadro */
-.box-number {
-    position: absolute;
-    top: -30px;
-    left: 20px;
-    color: #E36C0A;
-    font-family: sans-serif;
-    font-weight: bold;
-    font-size: 60pt;
-    background-color: #fff;
-    padding: 0 15px;
-    line-height: 1;
-    z-index: 10;
-}
-
 .flipbook-title {
     color: #E36C0A;
     font-family: sans-serif;
@@ -212,7 +197,7 @@ body {
 <!-- Menú superior -->
 <div class="topnav" id="myTopnav">
     <a href="index.html" class="active">Inicio</a>
-    <a href="index.html">Anterior</a>
+    <a href="rutas6.html">Anterior</a>
     <a href="rutas1.html">Siguiente</a>
 </div>
 
@@ -228,7 +213,6 @@ body {
     
     <!-- Recuadro 1: PDF en Español -->
     <div class="flipbook-box">
-        <div class="box-number">1</div>
         <h2 class="flipbook-title">Rutas en Español</h2>
         
         <div class="flipbook-wrapper">
@@ -248,7 +232,6 @@ body {
     
     <!-- Recuadro 2: PDF en Inglés -->
     <div class="flipbook-box">
-        <div class="box-number">2</div>
         <h2 class="flipbook-title">Routes in English</h2>
         
         <div class="flipbook-wrapper">
@@ -314,7 +297,7 @@ async function createFlipbook(pdfUrl, flipbookId, prevBtnId, nextBtnId, pageIndi
             elevation: 50,
             duration: 1000,
             acceleration: true,
-            display: 'single'  // CLAVE: Muestra solo UNA página a la vez
+            display: 'single'
         });
         
         // Controles de navegación
