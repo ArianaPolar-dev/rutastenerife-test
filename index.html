@@ -100,17 +100,24 @@ body {
     background-color: #f9f9f9;
     border-radius: 5px;
     overflow: hidden;
+    padding: 15px;
 }
 
 .flipbook {
     box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    max-width: 100%;
+    max-height: 100%;
 }
 
 .flipbook .page {
     background-color: white;
-    background-size: contain;
-    background-position: center;
-    background-repeat: no-repeat;
+    background-size: contain !important;
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
+    width: 100% !important;
+    height: 100% !important;
+    overflow: hidden !important;
+    box-sizing: border-box;
 }
 
 /* Controles de navegación */
@@ -197,7 +204,7 @@ body {
 <!-- Menú superior -->
 <div class="topnav" id="myTopnav">
     <a href="index.html" class="active">Inicio</a>
-    <a href="rutas6.html">Anterior</a>
+    <a href="index.html">Anterior</a>
     <a href="rutas1.html">Siguiente</a>
 </div>
 
@@ -288,10 +295,10 @@ async function createFlipbook(pdfUrl, flipbookId, prevBtnId, nextBtnId, pageIndi
             $(flipbookId).append(`<div class="page" style="background-image: url('${imgData}')"></div>`);
         }
         
-        // Inicializar Turn.js con DISPLAY: SINGLE (una sola página)
+        // Inicializar Turn.js con DISPLAY: SINGLE (una sola página) - TAMAÑO REDUCIDO
         $(flipbookId).turn({
-            width: 550,
-            height: 650,
+            width: 500,
+            height: 600,
             autoCenter: true,
             gradients: true,
             elevation: 50,
