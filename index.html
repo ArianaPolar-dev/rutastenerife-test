@@ -6,9 +6,14 @@
 <meta name="author" content="casa">
 <title>Costa Adeje</title>
 
-<!-- jQuery y Turn.js -->
+<!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Turn.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/3/turn.min.js"></script>
+
+<!-- PDF.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
 <style type="text/css">
 body { 
@@ -21,21 +26,6 @@ body {
     border-width: 1px; 
     border-color: black; 
     border-style: solid; 
-}
-
-p { 
-    color: #E36C0A; 
-    font-family: sans-serif; 
-    font-weight: bold; 
-    font-size: 48pt; 
-    text-align: center; 
-}
-
-img { 
-    display: block; 
-    margin: 0 auto; 
-    max-width: 100%; 
-    height: auto; 
 }
 
 .topnav { 
@@ -63,7 +53,7 @@ img {
     color: white; 
 }
 
-/* Título Costa Adeje */
+/* Título principal */
 .main-title {
     color: #E36C0A;
     font-family: sans-serif;
@@ -73,15 +63,15 @@ img {
     margin: 30px 0;
 }
 
-/* Container de los PDFs */
-.pdfs-container {
+/* Container de los flipbooks */
+.flipbooks-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 40px;
     margin: 40px 0;
 }
 
-.pdf-box {
+.flipbook-box {
     border: 4px solid #E36C0A;
     padding: 25px;
     background-color: #fff;
@@ -92,7 +82,7 @@ img {
 /* Número del recuadro */
 .box-number {
     position: absolute;
-    top: -25px;
+    top: -30px;
     left: 20px;
     color: #E36C0A;
     font-family: sans-serif;
@@ -100,9 +90,11 @@ img {
     font-size: 60pt;
     background-color: #fff;
     padding: 0 15px;
+    line-height: 1;
+    z-index: 10;
 }
 
-.pdf-title {
+.flipbook-title {
     color: #E36C0A;
     font-family: sans-serif;
     font-weight: bold;
@@ -112,34 +104,91 @@ img {
     margin-top: 10px;
 }
 
-/* Visor de PDF embebido */
-.pdf-viewer {
+/* Contenedor del flipbook */
+.flipbook-wrapper {
     width: 100%;
     height: 600px;
-    border: 2px solid #ddd;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f9f9f9;
     border-radius: 5px;
+}
+
+.flipbook {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.flipbook .page {
+    background-color: white;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+/* Controles de navegación */
+.flipbook-controls {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.control-btn {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    margin: 0 10px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.control-btn:hover {
+    background-color: #04AA6D;
+}
+
+.control-btn:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.page-indicator {
+    display: inline-block;
+    margin: 0 15px;
+    color: #E36C0A;
+    font-weight: bold;
+    font-size: 16px;
 }
 
 .download-btn {
     display: block;
-    background-color: #4CAF50;
+    background-color: #E36C0A;
     color: white;
     text-align: center;
-    padding: 15px 20px;
+    padding: 12px 20px;
     text-decoration: none;
-    font-size: 18px;
+    font-size: 16px;
     font-weight: bold;
     border-radius: 5px;
-    margin-top: 20px;
+    margin-top: 15px;
 }
 
 .download-btn:hover {
-    background-color: #04AA6D;
+    opacity: 0.8;
+}
+
+.loading {
+    text-align: center;
+    padding: 50px;
+    color: #666;
+    font-size: 18px;
 }
 
 /* Responsive */
 @media (max-width: 1024px) {
-    .pdfs-container {
+    .flipbooks-container {
         grid-template-columns: 1fr;
     }
     
@@ -147,11 +196,11 @@ img {
         font-size: 36pt;
     }
     
-    .pdf-title {
+    .flipbook-title {
         font-size: 24pt;
     }
     
-    .pdf-viewer {
+    .flipbook-wrapper {
         height: 500px;
     }
 }
@@ -173,30 +222,148 @@ img {
     COSTA ADEJE<br>TENERIFE
 </div>
 
-<!-- Container de los dos PDFs (AQUÍ VA DONDE ESTABA LA IMAGEN) -->
-<div class="pdfs-container">
+<!-- Container de los dos flipbooks -->
+<div class="flipbooks-container">
     
     <!-- Recuadro 1: PDF en Español -->
-    <div class="pdf-box">
+    <div class="flipbook-box">
         <div class="box-number">1</div>
-        <h2 class="pdf-title">Rutas en Español</h2>
-        <embed class="pdf-viewer" 
-               src="Guia Rutas Tenerife Español.pdf" 
-               type="application/pdf">
+        <h2 class="flipbook-title">Rutas en Español</h2>
+        
+        <div class="flipbook-wrapper">
+            <div id="flipbook-es" class="flipbook">
+                <div class="loading">Cargando PDF...</div>
+            </div>
+        </div>
+        
+        <div class="flipbook-controls">
+            <button class="control-btn" id="prev-es">← Anterior</button>
+            <span class="page-indicator" id="page-es">Página 1</span>
+            <button class="control-btn" id="next-es">Siguiente →</button>
+        </div>
+        
         <a href="Guia Rutas Tenerife Español.pdf" download class="download-btn">⬇ Descargar PDF</a>
     </div>
     
     <!-- Recuadro 2: PDF en Inglés -->
-    <div class="pdf-box">
+    <div class="flipbook-box">
         <div class="box-number">2</div>
-        <h2 class="pdf-title">Routes in English</h2>
-        <embed class="pdf-viewer" 
-               src="Guide Rutas Tenerifes English.pdf" 
-               type="application/pdf">
+        <h2 class="flipbook-title">Routes in English</h2>
+        
+        <div class="flipbook-wrapper">
+            <div id="flipbook-en" class="flipbook">
+                <div class="loading">Loading PDF...</div>
+            </div>
+        </div>
+        
+        <div class="flipbook-controls">
+            <button class="control-btn" id="prev-en">← Previous</button>
+            <span class="page-indicator" id="page-en">Page 1</span>
+            <button class="control-btn" id="next-en">Next →</button>
+        </div>
+        
         <a href="Guide Rutas Tenerifes English.pdf" download class="download-btn">⬇ Download PDF</a>
     </div>
     
 </div>
+
+<script>
+// Configurar PDF.js
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+// Función para cargar y crear flipbook desde PDF
+async function createFlipbook(pdfUrl, flipbookId, prevBtnId, nextBtnId, pageIndicatorId) {
+    try {
+        // Cargar PDF
+        const loadingTask = pdfjsLib.getDocument(pdfUrl);
+        const pdf = await loadingTask.promise;
+        const numPages = pdf.numPages;
+        
+        // Limpiar contenedor
+        $(flipbookId).empty();
+        
+        // Renderizar cada página como imagen
+        for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+            const page = await pdf.getPage(pageNum);
+            const viewport = page.getViewport({ scale: 1.5 });
+            
+            // Crear canvas para cada página
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+            
+            // Renderizar página en canvas
+            await page.render({
+                canvasContext: context,
+                viewport: viewport
+            }).promise;
+            
+            // Convertir canvas a imagen y añadir al flipbook
+            const imgData = canvas.toDataURL();
+            $(flipbookId).append(`<div class="page" style="background-image: url('${imgData}')"></div>`);
+        }
+        
+        // Inicializar Turn.js
+        $(flipbookId).turn({
+            width: 800,
+            height: 600,
+            autoCenter: true,
+            gradients: true,
+            elevation: 50,
+            duration: 1000,
+            acceleration: true
+        });
+        
+        // Controles de navegación
+        $(prevBtnId).click(function() {
+            $(flipbookId).turn('previous');
+        });
+        
+        $(nextBtnId).click(function() {
+            $(flipbookId).turn('next');
+        });
+        
+        // Actualizar indicador de página
+        $(flipbookId).bind('turned', function(event, page, view) {
+            const currentPage = $(flipbookId).turn('page');
+            const totalPages = $(flipbookId).turn('pages');
+            $(pageIndicatorId).text(`Página ${currentPage} de ${totalPages}`);
+            
+            // Deshabilitar botones en límites
+            $(prevBtnId).prop('disabled', currentPage === 1);
+            $(nextBtnId).prop('disabled', currentPage === totalPages);
+        });
+        
+        // Estado inicial
+        $(prevBtnId).prop('disabled', true);
+        $(pageIndicatorId).text(`Página 1 de ${numPages}`);
+        
+    } catch (error) {
+        console.error('Error cargando PDF:', error);
+        $(flipbookId).html('<div class="loading">Error al cargar el PDF</div>');
+    }
+}
+
+// Inicializar ambos flipbooks cuando el documento esté listo
+$(document).ready(function() {
+    createFlipbook(
+        'Guia Rutas Tenerife Español.pdf',
+        '#flipbook-es',
+        '#prev-es',
+        '#next-es',
+        '#page-es'
+    );
+    
+    createFlipbook(
+        'Guide Rutas Tenerifes English.pdf',
+        '#flipbook-en',
+        '#prev-en',
+        '#next-en',
+        '#page-en'
+    );
+});
+</script>
 
 </body>
 </html>
