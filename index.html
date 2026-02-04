@@ -107,13 +107,14 @@ body {
 /* Contenedor del flipbook */
 .flipbook-wrapper {
     width: 100%;
-    height: 600px;
+    height: 650px;
     position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
     background-color: #f9f9f9;
     border-radius: 5px;
+    overflow: hidden;
 }
 
 .flipbook {
@@ -271,7 +272,7 @@ body {
 // Configurar PDF.js
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-// Función para cargar y crear flipbook desde PDF
+// Función para cargar y crear flipbook desde PDF (UNA SOLA PÁGINA)
 async function createFlipbook(pdfUrl, flipbookId, prevBtnId, nextBtnId, pageIndicatorId) {
     try {
         // Cargar PDF
@@ -304,15 +305,16 @@ async function createFlipbook(pdfUrl, flipbookId, prevBtnId, nextBtnId, pageIndi
             $(flipbookId).append(`<div class="page" style="background-image: url('${imgData}')"></div>`);
         }
         
-        // Inicializar Turn.js
+        // Inicializar Turn.js con DISPLAY: SINGLE (una sola página)
         $(flipbookId).turn({
-            width: 800,
-            height: 600,
+            width: 550,
+            height: 650,
             autoCenter: true,
             gradients: true,
             elevation: 50,
             duration: 1000,
-            acceleration: true
+            acceleration: true,
+            display: 'single'  // CLAVE: Muestra solo UNA página a la vez
         });
         
         // Controles de navegación
@@ -328,7 +330,13 @@ async function createFlipbook(pdfUrl, flipbookId, prevBtnId, nextBtnId, pageIndi
         $(flipbookId).bind('turned', function(event, page, view) {
             const currentPage = $(flipbookId).turn('page');
             const totalPages = $(flipbookId).turn('pages');
-            $(pageIndicatorId).text(`Página ${currentPage} de ${totalPages}`);
+            
+            // Actualizar texto según idioma
+            if (pageIndicatorId === '#page-es') {
+                $(pageIndicatorId).text(`Página ${currentPage} de ${totalPages}`);
+            } else {
+                $(pageIndicatorId).text(`Page ${currentPage} of ${totalPages}`);
+            }
             
             // Deshabilitar botones en límites
             $(prevBtnId).prop('disabled', currentPage === 1);
@@ -337,7 +345,11 @@ async function createFlipbook(pdfUrl, flipbookId, prevBtnId, nextBtnId, pageIndi
         
         // Estado inicial
         $(prevBtnId).prop('disabled', true);
-        $(pageIndicatorId).text(`Página 1 de ${numPages}`);
+        if (pageIndicatorId === '#page-es') {
+            $(pageIndicatorId).text(`Página 1 de ${numPages}`);
+        } else {
+            $(pageIndicatorId).text(`Page 1 of ${numPages}`);
+        }
         
     } catch (error) {
         console.error('Error cargando PDF:', error);
