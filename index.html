@@ -91,37 +91,26 @@ body {
 /* Contenedor del flipbook */
 .flipbook-wrapper {
     width: 100%;
-    height: 650px;
+    height: 700px;
     position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #333;
+    background-color: #2a2a2a;
     border-radius: 5px;
     overflow: visible;
-    padding: 20px;
+    padding: 30px;
 }
 
 .flipbook {
-    box-shadow: 0 8px 40px rgba(0,0,0,0.5);
-    max-width: 100%;
-    max-height: 100%;
+    box-shadow: 0 10px 50px rgba(0,0,0,0.6);
 }
 
 .flipbook .page {
-    background-color: white;
-    background-size: cover !important;
-    background-position: center center !important;
+    background-color: #fff;
+    background-size: 100% 100% !important;
+    background-position: center !important;
     background-repeat: no-repeat !important;
-    box-shadow: 0 0 20px rgba(0,0,0,0.2);
-}
-
-.flipbook .hard {
-    background: linear-gradient(90deg, #8B7355 0%, #A0826D 100%);
-}
-
-.flipbook .even {
-    background: linear-gradient(-90deg, rgba(0,0,0,0.03) 0%, rgba(0,0,0,0) 100%);
 }
 
 /* Controles de navegación */
@@ -179,7 +168,7 @@ body {
 .loading {
     text-align: center;
     padding: 50px;
-    color: #666;
+    color: #999;
     font-size: 18px;
 }
 
@@ -266,7 +255,7 @@ body {
 // Configurar PDF.js
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-// Función para cargar y crear flipbook desde PDF con EFECTO REALISTA
+// Función para cargar y crear flipbook estilo LIBRO ABIERTO (doble página)
 async function createFlipbook(pdfUrl, flipbookId, prevBtnId, nextBtnId, pageIndicatorId) {
     try {
         // Cargar PDF
@@ -277,10 +266,10 @@ async function createFlipbook(pdfUrl, flipbookId, prevBtnId, nextBtnId, pageIndi
         // Limpiar contenedor
         $(flipbookId).empty();
         
-        // Renderizar cada página como imagen con MEJOR CALIDAD
+        // Renderizar cada página como imagen
         for (let pageNum = 1; pageNum <= numPages; pageNum++) {
             const page = await pdf.getPage(pageNum);
-            const viewport = page.getViewport({ scale: 2.0 }); // Aumentar escala para mejor calidad
+            const viewport = page.getViewport({ scale: 2.0 });
             
             // Crear canvas para cada página
             const canvas = document.createElement('canvas');
@@ -296,29 +285,28 @@ async function createFlipbook(pdfUrl, flipbookId, prevBtnId, nextBtnId, pageIndi
             
             // Convertir canvas a imagen y añadir al flipbook
             const imgData = canvas.toDataURL('image/jpeg', 0.95);
-            $(flipbookId).append(`<div class="page" style="background-image: url('${imgData}')"></div>`);
+            $(flipbookId).append(`<div class="page"><img src="${imgData}" style="width:100%; height:100%; object-fit:contain;"></div>`);
         }
         
-        // Inicializar Turn.js con EFECTO 3D MEJORADO
+        // Inicializar Turn.js con MODO DOBLE PÁGINA (como libro abierto real)
         $(flipbookId).turn({
-            width: 450,
-            height: 550,
+            width: 900,              // Ancho total (dos páginas)
+            height: 600,             // Alto
             autoCenter: true,
-            gradients: true,           // Gradientes para profundidad
-            elevation: 50,             // Elevación 3D
-            duration: 1500,            // Animación más lenta y suave
-            acceleration: true,        // Aceleración hardware
-            display: 'single',         // Una página a la vez
-            turnCorners: 'bl,br',      // Esquinas que se pueden voltear
+            gradients: true,
+            elevation: 50,
+            duration: 1200,
+            acceleration: true,
+            display: 'double',       // DOBLE PÁGINA como libro abierto
             when: {
                 turning: function(event, page, view) {
-                    // Aquí se puede añadir lógica adicional al voltear
+                    console.log('Volteando a página', page);
                 }
             }
         });
         
         // Permitir clic en las páginas para voltear
-        $(flipbookId).bind('mousedown', function(e) {
+        $(flipbookId).bind('click', function(e) {
             const offset = $(this).offset();
             const relX = e.pageX - offset.left;
             const width = $(this).width();
@@ -330,19 +318,6 @@ async function createFlipbook(pdfUrl, flipbookId, prevBtnId, nextBtnId, pageIndi
             // Si hace clic en el lado izquierdo, retrocede
             else {
                 $(flipbookId).turn('previous');
-            }
-        });
-        
-        // Cambiar cursor según posición del mouse
-        $(flipbookId).bind('mousemove', function(e) {
-            const offset = $(this).offset();
-            const relX = e.pageX - offset.left;
-            const width = $(this).width();
-            
-            if (relX > width / 2) {
-                $(this).css('cursor', 'e-resize');
-            } else {
-                $(this).css('cursor', 'w-resize');
             }
         });
         
