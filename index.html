@@ -98,7 +98,7 @@ body {
 /* Portada del PDF */
 .pdf-cover {
     width: 100%;
-    height: 400px;
+    height: 500px;
     background-color: #f0f0f0;
     border-radius: 5px;
     display: flex;
@@ -107,6 +107,9 @@ body {
     font-size: 18px;
     color: #666;
     margin-bottom: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
 }
 
 .pdf-cover img {
@@ -115,24 +118,24 @@ body {
     object-fit: contain;
 }
 
-.open-btn {
-    display: block;
-    background-color: #4CAF50;
+.pdf-cover::after {
+    content: '📖 Click para abrir';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(76, 175, 80, 0.9);
     color: white;
+    padding: 15px;
     text-align: center;
-    padding: 15px 20px;
-    text-decoration: none;
-    font-size: 18px;
     font-weight: bold;
-    border-radius: 5px;
-    border: none;
-    cursor: pointer;
-    width: 100%;
-    margin-bottom: 10px;
+    font-size: 18px;
+    opacity: 0;
+    transition: opacity 0.3s;
 }
 
-.open-btn:hover {
-    background-color: #04AA6D;
+.pdf-box:hover .pdf-cover::after {
+    opacity: 1;
 }
 
 .download-btn {
@@ -193,6 +196,14 @@ body {
     background-size: 100% 100% !important;
     background-position: center !important;
     background-repeat: no-repeat !important;
+    display: block !important;
+}
+
+.flipbook .page img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
 }
 
 /* Flechas de navegación */
@@ -314,23 +325,21 @@ body {
 <div class="pdfs-container">
     
     <!-- PDF 1: Español -->
-    <div class="pdf-box">
+    <div class="pdf-box" onclick="openFlipbook('es')">
         <h2 class="pdf-title">Rutas en Español</h2>
         <div class="pdf-cover" id="cover-es">
-            <p>📄 Click para abrir</p>
+            <p>Cargando portada...</p>
         </div>
-        <button class="open-btn" onclick="openFlipbook('es')">📖 Abrir Guía</button>
-        <a href="Guia Rutas Tenerife Español.pdf" download class="download-btn">⬇ Descargar PDF</a>
+        <a href="Guia Rutas Tenerife Español.pdf" download class="download-btn" onclick="event.stopPropagation()">⬇ Descargar PDF</a>
     </div>
     
     <!-- PDF 2: Inglés -->
-    <div class="pdf-box">
+    <div class="pdf-box" onclick="openFlipbook('en')">
         <h2 class="pdf-title">Routes in English</h2>
         <div class="pdf-cover" id="cover-en">
-            <p>📄 Click to open</p>
+            <p>Loading cover...</p>
         </div>
-        <button class="open-btn" onclick="openFlipbook('en')">📖 Open Guide</button>
-        <a href="Guide Rutas Tenerifes English.pdf" download class="download-btn">⬇ Download PDF</a>
+        <a href="Guide Rutas Tenerifes English.pdf" download class="download-btn" onclick="event.stopPropagation()">⬇ Download PDF</a>
     </div>
     
 </div>
@@ -377,6 +386,11 @@ const flipbooksLoaded = {
     en: false
 };
 
+const pdfData = {
+    es: { pages: [] },
+    en: { pages: [] }
+};
+
 const pdfConfig = {
     es: {
         url: 'Guia Rutas Tenerife Español.pdf',
@@ -400,12 +414,47 @@ const pdfConfig = {
     }
 };
 
+// Cargar portadas al inicio
+$(document).ready(function() {
+    loadCover('es');
+    loadCover('en');
+});
+
+// Cargar solo la portada (primera página)
+async function loadCover(lang) {
+    const config = pdfConfig[lang];
+    
+    try {
+        const loadingTask = pdfjsLib.getDocument(config.url);
+        const pdf = await loadingTask.promise;
+        const page = await pdf.getPage(1);
+        const viewport = page.getViewport({ scale: 2.0 });
+        
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        
+        await page.render({
+            canvasContext: context,
+            viewport: viewport
+        }).promise;
+        
+        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+        $(config.coverId).html(`<img src="${imgData}">`);
+        
+    } catch (error) {
+        console.error('Error cargando portada:', error);
+        $(config.coverId).html('<p>Error al cargar portada</p>');
+    }
+}
+
 // Función para abrir flipbook en modal
 function openFlipbook(lang) {
     const config = pdfConfig[lang];
     $(config.modalId).addClass('active');
     
-    // Cargar PDF si no está cargado
+    // Cargar PDF completo si no está cargado
     if (!flipbooksLoaded[lang]) {
         createFlipbook(lang);
         flipbooksLoaded[lang] = true;
@@ -436,7 +485,8 @@ async function createFlipbook(lang) {
         
         $(config.flipbookId).empty();
         
-        // Renderizar páginas
+        // Renderizar todas las páginas primero (sin mostrarlas)
+        const pages = [];
         for (let pageNum = 1; pageNum <= numPages; pageNum++) {
             const page = await pdf.getPage(pageNum);
             const viewport = page.getViewport({ scale: 2.0 });
@@ -452,13 +502,13 @@ async function createFlipbook(lang) {
             }).promise;
             
             const imgData = canvas.toDataURL('image/jpeg', 0.95);
-            $(config.flipbookId).append(`<div class="page"><img src="${imgData}" style="width:100%; height:100%; object-fit:contain;"></div>`);
-            
-            // Mostrar primera página como portada
-            if (pageNum === 1) {
-                $(config.coverId).html(`<img src="${imgData}">`);
-            }
+            pages.push(imgData);
         }
+        
+        // Crear estructura del flipbook OCULTA inicialmente
+        pages.forEach((imgData, index) => {
+            $(config.flipbookId).append(`<div class="page" style="display:none;"><img src="${imgData}"></div>`);
+        });
         
         // Inicializar Turn.js en modo DOBLE PÁGINA
         $(config.flipbookId).turn({
@@ -469,8 +519,21 @@ async function createFlipbook(lang) {
             elevation: 50,
             duration: 1200,
             acceleration: true,
-            display: 'double'
+            display: 'double',
+            when: {
+                turned: function(event, page, view) {
+                    const currentPage = $(config.flipbookId).turn('page');
+                    const totalPages = $(config.flipbookId).turn('pages');
+                    
+                    $(config.counterId).text(`${config.pageText} ${currentPage} de ${totalPages}`);
+                    $(config.prevBtn).prop('disabled', currentPage === 1);
+                    $(config.nextBtn).prop('disabled', currentPage === totalPages);
+                }
+            }
         });
+        
+        // Mostrar páginas SOLO cuando Turn.js esté listo
+        $(config.flipbookId).find('.page').css('display', 'block');
         
         // Navegación con flechas
         $(config.prevBtn).click(function() {
@@ -479,16 +542,6 @@ async function createFlipbook(lang) {
         
         $(config.nextBtn).click(function() {
             $(config.flipbookId).turn('next');
-        });
-        
-        // Actualizar contador y botones
-        $(config.flipbookId).bind('turned', function(event, page, view) {
-            const currentPage = $(config.flipbookId).turn('page');
-            const totalPages = $(config.flipbookId).turn('pages');
-            
-            $(config.counterId).text(`${config.pageText} ${currentPage} de ${totalPages}`);
-            $(config.prevBtn).prop('disabled', currentPage === 1);
-            $(config.nextBtn).prop('disabled', currentPage === totalPages);
         });
         
         // Estado inicial
