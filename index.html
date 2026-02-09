@@ -6,7 +6,7 @@
 <meta name="author" content="casa">
 <title>Costa Adeje</title>
 
-<!-- jQuery (requerido) -->
+<!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <!-- Turn.js -->
@@ -96,27 +96,32 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #f9f9f9;
+    background-color: #333;
     border-radius: 5px;
-    overflow: hidden;
+    overflow: visible;
     padding: 20px;
 }
 
 .flipbook {
-    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.5);
     max-width: 100%;
     max-height: 100%;
 }
 
 .flipbook .page {
     background-color: white;
-    background-size: contain !important;
+    background-size: cover !important;
     background-position: center center !important;
     background-repeat: no-repeat !important;
-    width: 100% !important;
-    height: 100% !important;
-    overflow: hidden !important;
-    box-sizing: border-box;
+    box-shadow: 0 0 20px rgba(0,0,0,0.2);
+}
+
+.flipbook .hard {
+    background: linear-gradient(90deg, #8B7355 0%, #A0826D 100%);
+}
+
+.flipbook .even {
+    background: linear-gradient(-90deg, rgba(0,0,0,0.03) 0%, rgba(0,0,0,0) 100%);
 }
 
 /* Controles de navegación */
@@ -261,11 +266,7 @@ body {
 // Configurar PDF.js
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-// Crear audio de sonido de página (puedes reemplazar con tu propio archivo)
-const pageSound = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSqL1fPTgjMGHm7A7+OZUR0KTqbm8bhkFgk1ltnwy3ElBSl+zPDajz0JFmG56+mjURsKSKLl8bpnGAk5md3wzHMnBCuBzvDdikAJFV+25Oh9MwUwfcnw3I86CA=='); 
-pageSound.volume = 0.3;
-
-// Función para cargar y crear flipbook desde PDF CON SONIDO
+// Función para cargar y crear flipbook desde PDF con EFECTO REALISTA
 async function createFlipbook(pdfUrl, flipbookId, prevBtnId, nextBtnId, pageIndicatorId) {
     try {
         // Cargar PDF
@@ -276,10 +277,10 @@ async function createFlipbook(pdfUrl, flipbookId, prevBtnId, nextBtnId, pageIndi
         // Limpiar contenedor
         $(flipbookId).empty();
         
-        // Renderizar cada página como imagen
+        // Renderizar cada página como imagen con MEJOR CALIDAD
         for (let pageNum = 1; pageNum <= numPages; pageNum++) {
             const page = await pdf.getPage(pageNum);
-            const viewport = page.getViewport({ scale: 1.5 });
+            const viewport = page.getViewport({ scale: 2.0 }); // Aumentar escala para mejor calidad
             
             // Crear canvas para cada página
             const canvas = document.createElement('canvas');
@@ -294,26 +295,54 @@ async function createFlipbook(pdfUrl, flipbookId, prevBtnId, nextBtnId, pageIndi
             }).promise;
             
             // Convertir canvas a imagen y añadir al flipbook
-            const imgData = canvas.toDataURL();
+            const imgData = canvas.toDataURL('image/jpeg', 0.95);
             $(flipbookId).append(`<div class="page" style="background-image: url('${imgData}')"></div>`);
         }
         
-        // Inicializar Turn.js con efecto más realista
+        // Inicializar Turn.js con EFECTO 3D MEJORADO
         $(flipbookId).turn({
             width: 450,
             height: 550,
             autoCenter: true,
-            gradients: true,
-            elevation: 50,
-            duration: 1200,        // Más lento = más realista
-            acceleration: true,
-            display: 'single',
+            gradients: true,           // Gradientes para profundidad
+            elevation: 50,             // Elevación 3D
+            duration: 1500,            // Animación más lenta y suave
+            acceleration: true,        // Aceleración hardware
+            display: 'single',         // Una página a la vez
+            turnCorners: 'bl,br',      // Esquinas que se pueden voltear
             when: {
                 turning: function(event, page, view) {
-                    // REPRODUCIR SONIDO AL PASAR PÁGINA
-                    pageSound.currentTime = 0;
-                    pageSound.play().catch(e => console.log('Audio bloqueado por navegador'));
+                    // Aquí se puede añadir lógica adicional al voltear
                 }
+            }
+        });
+        
+        // Permitir clic en las páginas para voltear
+        $(flipbookId).bind('mousedown', function(e) {
+            const offset = $(this).offset();
+            const relX = e.pageX - offset.left;
+            const width = $(this).width();
+            
+            // Si hace clic en el lado derecho, avanza
+            if (relX > width / 2) {
+                $(flipbookId).turn('next');
+            } 
+            // Si hace clic en el lado izquierdo, retrocede
+            else {
+                $(flipbookId).turn('previous');
+            }
+        });
+        
+        // Cambiar cursor según posición del mouse
+        $(flipbookId).bind('mousemove', function(e) {
+            const offset = $(this).offset();
+            const relX = e.pageX - offset.left;
+            const width = $(this).width();
+            
+            if (relX > width / 2) {
+                $(this).css('cursor', 'e-resize');
+            } else {
+                $(this).css('cursor', 'w-resize');
             }
         });
         
