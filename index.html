@@ -6,14 +6,8 @@
 <meta name="author" content="casa">
 <title>Costa Adeje</title>
 
-<!-- jQuery -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-<!-- Turn.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/3/turn.min.js"></script>
-
-<!-- PDF.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<!-- DearFlip CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dearflip@2.7.15/css/dearflip.min.css">
 
 <style type="text/css">
 body { 
@@ -88,70 +82,20 @@ body {
     margin-top: 0;
 }
 
-/* Contenedor del flipbook */
-.flipbook-wrapper {
-    width: 100%;
+/* Contenedor del flipbook DearFlip */
+._df_book {
     height: 650px;
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    width: 100%;
+    margin: 20px auto;
     background-color: #f9f9f9;
     border-radius: 5px;
-    overflow: hidden;
-    padding: 20px;
 }
 
-.flipbook {
-    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-    max-width: 100%;
-    max-height: 100%;
-}
-
-.flipbook .page {
-    background-color: white;
-    background-size: contain !important;
-    background-position: center center !important;
-    background-repeat: no-repeat !important;
-    width: 100% !important;
-    height: 100% !important;
-    overflow: hidden !important;
-    box-sizing: border-box;
-}
-
-/* Controles de navegación */
+/* Controles personalizados (ocultos porque DearFlip tiene propios) */
 .flipbook-controls {
     text-align: center;
     margin-top: 20px;
-}
-
-.control-btn {
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    padding: 12px 25px;
-    margin: 0 10px;
-    cursor: pointer;
-    border-radius: 5px;
-    font-size: 16px;
-    font-weight: bold;
-}
-
-.control-btn:hover {
-    background-color: #04AA6D;
-}
-
-.control-btn:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-}
-
-.page-indicator {
-    display: inline-block;
-    margin: 0 15px;
-    color: #E36C0A;
-    font-weight: bold;
-    font-size: 16px;
+    display: none;
 }
 
 .download-btn {
@@ -171,13 +115,6 @@ body {
     opacity: 0.8;
 }
 
-.loading {
-    text-align: center;
-    padding: 50px;
-    color: #666;
-    font-size: 18px;
-}
-
 /* Responsive */
 @media (max-width: 1024px) {
     .flipbooks-container {
@@ -192,7 +129,7 @@ body {
         font-size: 24pt;
     }
     
-    .flipbook-wrapper {
+    ._df_book {
         height: 500px;
     }
 }
@@ -221,16 +158,14 @@ body {
     <div class="flipbook-box">
         <h2 class="flipbook-title">Rutas en Español</h2>
         
-        <div class="flipbook-wrapper">
-            <div id="flipbook-es" class="flipbook">
-                <div class="loading">Cargando PDF...</div>
-            </div>
-        </div>
-        
-        <div class="flipbook-controls">
-            <button class="control-btn" id="prev-es">← Anterior</button>
-            <span class="page-indicator" id="page-es">Página 1</span>
-            <button class="control-btn" id="next-es">Siguiente →</button>
+        <div class="_df_book" 
+             id="flipbook-es"
+             source="Guia Rutas Tenerife Español.pdf" 
+             webgl="true"
+             height="650"
+             sound="true"
+             duration="800"
+             backgroundcolor="#f9f9f9">
         </div>
         
         <a href="Guia Rutas Tenerife Español.pdf" download class="download-btn">⬇ Descargar PDF</a>
@@ -240,16 +175,14 @@ body {
     <div class="flipbook-box">
         <h2 class="flipbook-title">Routes in English</h2>
         
-        <div class="flipbook-wrapper">
-            <div id="flipbook-en" class="flipbook">
-                <div class="loading">Loading PDF...</div>
-            </div>
-        </div>
-        
-        <div class="flipbook-controls">
-            <button class="control-btn" id="prev-en">← Previous</button>
-            <span class="page-indicator" id="page-en">Page 1</span>
-            <button class="control-btn" id="next-en">Next →</button>
+        <div class="_df_book" 
+             id="flipbook-en"
+             source="Guide Rutas Tenerifes English.pdf" 
+             webgl="true"
+             height="650"
+             sound="true"
+             duration="800"
+             backgroundcolor="#f9f9f9">
         </div>
         
         <a href="Guide Rutas Tenerifes English.pdf" download class="download-btn">⬇ Download PDF</a>
@@ -257,112 +190,32 @@ body {
     
 </div>
 
+<!-- DearFlip JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/dearflip@2.7.15/js/dearflip.min.js"></script>
+
 <script>
-// Configurar PDF.js
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-
-// Función para cargar y crear flipbook desde PDF (UNA SOLA PÁGINA)
-async function createFlipbook(pdfUrl, flipbookId, prevBtnId, nextBtnId, pageIndicatorId) {
-    try {
-        // Cargar PDF
-        const loadingTask = pdfjsLib.getDocument(pdfUrl);
-        const pdf = await loadingTask.promise;
-        const numPages = pdf.numPages;
-        
-        // Limpiar contenedor
-        $(flipbookId).empty();
-        
-        // Renderizar cada página como imagen
-        for (let pageNum = 1; pageNum <= numPages; pageNum++) {
-            const page = await pdf.getPage(pageNum);
-            const viewport = page.getViewport({ scale: 1.5 });
-            
-            // Crear canvas para cada página
-            const canvas = document.createElement('canvas');
-            const context = canvas.getContext('2d');
-            canvas.width = viewport.width;
-            canvas.height = viewport.height;
-            
-            // Renderizar página en canvas
-            await page.render({
-                canvasContext: context,
-                viewport: viewport
-            }).promise;
-            
-            // Convertir canvas a imagen y añadir al flipbook
-            const imgData = canvas.toDataURL();
-            $(flipbookId).append(`<div class="page" style="background-image: url('${imgData}')"></div>`);
-        }
-        
-        // Inicializar Turn.js - TAMAÑO AÚN MÁS REDUCIDO
-        $(flipbookId).turn({
-            width: 450,
-            height: 550,
-            autoCenter: true,
-            gradients: true,
-            elevation: 50,
-            duration: 1000,
-            acceleration: true,
-            display: 'single'
-        });
-        
-        // Controles de navegación
-        $(prevBtnId).click(function() {
-            $(flipbookId).turn('previous');
-        });
-        
-        $(nextBtnId).click(function() {
-            $(flipbookId).turn('next');
-        });
-        
-        // Actualizar indicador de página
-        $(flipbookId).bind('turned', function(event, page, view) {
-            const currentPage = $(flipbookId).turn('page');
-            const totalPages = $(flipbookId).turn('pages');
-            
-            // Actualizar texto según idioma
-            if (pageIndicatorId === '#page-es') {
-                $(pageIndicatorId).text(`Página ${currentPage} de ${totalPages}`);
-            } else {
-                $(pageIndicatorId).text(`Page ${currentPage} of ${totalPages}`);
-            }
-            
-            // Deshabilitar botones en límites
-            $(prevBtnId).prop('disabled', currentPage === 1);
-            $(nextBtnId).prop('disabled', currentPage === totalPages);
-        });
-        
-        // Estado inicial
-        $(prevBtnId).prop('disabled', true);
-        if (pageIndicatorId === '#page-es') {
-            $(pageIndicatorId).text(`Página 1 de ${numPages}`);
-        } else {
-            $(pageIndicatorId).text(`Page 1 of ${numPages}`);
-        }
-        
-    } catch (error) {
-        console.error('Error cargando PDF:', error);
-        $(flipbookId).html('<div class="loading">Error al cargar el PDF</div>');
-    }
-}
-
-// Inicializar ambos flipbooks cuando el documento esté listo
-$(document).ready(function() {
-    createFlipbook(
-        'Guia Rutas Tenerife Español.pdf',
-        '#flipbook-es',
-        '#prev-es',
-        '#next-es',
-        '#page-es'
-    );
+// Configuración adicional de DearFlip para ambos flipbooks
+jQuery(document).ready(function($) {
     
-    createFlipbook(
-        'Guide Rutas Tenerifes English.pdf',
-        '#flipbook-en',
-        '#prev-en',
-        '#next-en',
-        '#page-en'
-    );
+    // Configurar flipbook español con opciones 3D y sonido
+    if (window.DFLIP) {
+        DFLIP.defaults = {
+            webgl: true,              // Efecto 3D WebGL
+            sound: true,              // Sonido al pasar páginas
+            height: 650,              // Altura
+            duration: 800,            // Duración animación (ms)
+            hardConfig: "soft",       // Tipo de tapa (soft = suave)
+            backgroundColor: "#f9f9f9",
+            controlsPosition: "bottom", // Controles abajo
+            pageMode: "single",       // Una página a la vez
+            singlePageMode: "zoom",   // Modo zoom en página única
+            autoEnableOutline: false,
+            autoEnableThumbnail: false,
+            overwritePDFOutline: false
+        };
+    }
+    
+    console.log('DearFlip 3D Flipbooks cargados con sonido');
 });
 </script>
 
