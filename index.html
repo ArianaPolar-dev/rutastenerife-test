@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="es" style="background-color: #8c8c8c">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="es">
 <head>
 <meta name="robots" content="noindex,nofollow">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -16,41 +16,39 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
 <style type="text/css">
-body { 
-    background-color: #fff; 
-    margin-top: 2%; 
-    margin-left: 4%; 
-    margin-right: 4%; 
-    margin-bottom: 2%; 
-    padding: 4%; 
-    border-width: 1px; 
-    border-color: black; 
-    border-style: solid; 
+/* Fondo blanco limpio, sin bordes */
+html, body { 
+    background-color: #ffffff; 
+    margin: 0;
+    padding: 0;
 }
 
+/* Menú superior SIN fondo verde, letras blancas cambiadas a verde */
 .topnav { 
-    background-color: #4CAF50; 
+    background-color: transparent;
     overflow: hidden; 
+    padding: 20px 40px;
 }
 
 .topnav a { 
     float: left; 
     display: block; 
-    color: #f2f2f2; 
+    color: #4CAF50;  /* LETRAS VERDES en lugar de blancas */
     text-align: center; 
-    padding: 18px 20px; 
+    padding: 12px 20px; 
     text-decoration: none; 
-    font-size: 21px; 
+    font-size: 18px;
+    font-weight: 600;
+    transition: all 0.3s;
 }
 
 .topnav a:hover { 
-    background-color: #ddd; 
-    color: black; 
+    color: #E36C0A;  /* Naranja al hover */
 }
 
 .topnav a.active { 
-    background-color: #04AA6D; 
-    color: white; 
+    color: #04AA6D;  /* Verde más oscuro para activo */
+    border-bottom: 3px solid #04AA6D;
 }
 
 /* Título principal */
@@ -60,7 +58,7 @@ body {
     font-weight: bold;
     font-size: 48pt;
     text-align: center;
-    margin: 30px 0;
+    margin: 40px 0 30px 0;
 }
 
 /* Container de los PDFs */
@@ -68,7 +66,9 @@ body {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 40px;
-    margin: 40px 0;
+    margin: 40px auto 80px auto;
+    max-width: 1200px;
+    padding: 0 20px;
 }
 
 .pdf-box {
@@ -78,11 +78,12 @@ body {
     position: relative;
     cursor: pointer;
     transition: transform 0.3s, box-shadow 0.3s;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
 }
 
 .pdf-box:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
 }
 
 .pdf-title {
@@ -148,6 +149,7 @@ body {
     font-size: 16px;
     font-weight: bold;
     border-radius: 5px;
+    transition: opacity 0.3s;
 }
 
 .download-btn:hover {
@@ -313,8 +315,6 @@ body {
     <a href="index.html">Anterior</a>
     <a href="rutas1.html">Siguiente</a>
 </div>
-
-<br>
 
 <!-- Título principal -->
 <div class="main-title">
